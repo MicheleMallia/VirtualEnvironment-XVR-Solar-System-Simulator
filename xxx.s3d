@@ -1,0 +1,1779 @@
+/* Include s3d symbo0.76ls */
+#include <Script3d.h>
+#include <Camera.s3d.h>
+#include <VirtualKey.h>
+#include "utils.s3d"
+
+#define SEL_PICK 1
+
+/* Set global scene parameters */
+SET SCENE_FOV  = 60;
+SET SCENE_NEAR = 0.5;
+SET SCENE_FAR  = 1000;
+ 
+ 
+// TODO: put your global variables here
+ 
+ 
+/* Camera globals */
+var cam;
+var CamPos = [120.0, 50.0, 120.0];   // camera position
+var camAngle = 0.0;
+ 
+/* Light globals */
+var Light0;
+var PosL = [0, 0, 0];      // default light position
+VAR LTime= 0;
+var contAngle = 0.0; 
+var venAngle = 0.0;
+var terAngle = 0.0;
+var lunAngle = 0.0;
+var martAngle = 0.0;
+var gioAngle = 0.0;
+var satAngle = 0.0;
+var satRingAngle = 0.0;
+var urAngle = 0.0;
+var netAngle = 0.0;
+var plutAngle = 0.0;
+ 
+ 
+var mymesh;
+var mymesh2;
+var venMesh;
+var terMesh;
+var lunMesh;
+var martMesh;
+var gioMesh;
+var satMesh;
+var satRingMesh;
+var satRingMesh2;
+var urMesh;
+var netMesh;
+var plutMesh;
+ 
+ 
+var myobj;
+var myobj2;
+var venObj;
+var terObj;
+var lunObj;
+var martObj;
+var gioObj;
+var satObj;
+var satRingObj;
+var satRingObj2;
+var urObj;
+var netObj;
+var plutObj;
+
+
+var posobj = [0,0,0];
+var posobj2 = [10,0,0];
+var posVen = [15,0,0];
+var posTer = [20,0,0];
+var posLun= [23,0,0];
+var posMart = [25,0,0];
+var posGio = [45,0,0];
+var posSat = [55,0,0];
+var posUr = [60,0,0];
+var posNet = [75,0,0];
+var posPlu = [100,0,0];
+ 
+var angleX = 0.0;
+var angleY = 0.0;
+var angleZ = 0.0;
+/* Function declarations */
+function CameraMoveMouse();
+function KeyboardManager();
+function DrawGrid(col, size);
+function DrawTextLayer();
+var mymat;
+var mytexture;
+
+var mercMat;
+var mercText;
+
+var venMat;
+var venText;
+
+var terMat;
+var terText;
+
+var lunMat;
+var lunText;
+
+var martMat;
+var martText;
+
+var gioMat;
+var gioText;
+
+var satMat;
+var satText;
+var satRingMat;
+var satRingText;
+
+var urMat;
+var urText;
+
+var netMat;
+var netText;
+
+var plutMat;
+var plutText;
+
+
+var trigger_rotazione =true;
+var trigger_orizzontale = false;
+var trigger_verticale = false;
+var trigger_camera = true;
+var trigger_sole = false;
+var trigger_merc=false;
+var trigger_ven=false;
+var trigger_ter=false;
+var trigger_lun=false;
+var trigger_mart=false;
+var trigger_gio=false;
+var trigger_sat=false;
+var trigger_ur=false; 
+var trigger_net=false;
+var trigger_plu = false;
+
+var vec;
+
+var trigger_descSole=false;
+var trigger_descMerc=false;
+var trigger_descVen=false;
+var trigger_descTer=false;
+var trigger_descLun=false;
+var trigger_descMart=false;
+var trigger_descGio=false;
+var trigger_descSat=false;
+var trigger_descUr=false;
+var trigger_descNet=false;
+var trigger_descPlu=false;
+
+var trigger_label=false;
+var label_sol;
+var label_merc;
+var label_ven;
+var label_ter;
+var label_mart;
+var label_gio;
+var label_sat;
+var label_ur;
+var label_net;
+var label_plu;
+
+var avi;
+
+
+function OnDownload()
+{
+       //FileDownload("data.zip");
+}
+ 
+ 
+function OnInit(params)
+{
+       SetLocalDir();
+       
+       ConsoleFont("Lucida console", 18);
+       LoadBackground("uni.jpg");
+      
+       /* initialize camera */
+       
+       
+       CameraGetCurrent().SetPosition(CamPos);
+       CameraGetCurrent().SetTarget(0.0,0.0,0.0);
+       
+       /* initialize light */
+       Light0 = CVmLight();
+       //Light0.SetPosition(PosL);
+       Light0.SetDiffuse(1, 1, 1);
+       Light0.SetAmbient(1, 1, 1);
+       Light0.SetSpecular(1, 1, 1);
+       Light0.Enable();   
+ 	  	
+ 	   
+       mymat = CVmMaterial();
+       mymat.diffuse = [1,1,1];
+       mymat.ambient = [1,1,1];
+       mytexture = CVmTexture("sun.jpg");
+       mymat.SetTexture(mytexture);
+      
+		//sole      
+       mymesh = CVmNewMesh(VRP_SPHERE);
+       mymesh.CenterBoundingBox();
+       mymesh.Normalize(20);
+       mymesh.ForceMaterial(mymat);
+       myobj = CVmObj(mymesh);
+       
+       
+       //mercurio
+       mercMat = CVmMaterial();
+       mymesh2 = CVmNewMesh(VRP_SPHERE);
+       mercText = CVmTexture("mercury.jpg");
+       mercMat.SetTexture(mercText);
+	   mymesh2.Normalize(2);
+       mymesh2.ForceMaterial(mercMat);
+       myobj2 = CVmObj(mymesh2);
+
+		//venere
+		
+	   venMat = CVmMaterial();
+	   venMesh = CVmNewMesh(VRP_SPHERE);
+	   venText = CVmTexture("ven.jpg");
+	   venMat.SetTexture(venText);
+	   venMesh.Normalize(2,3);
+	   venMesh.ForceMaterial(venMat);
+	   venObj = CVmObj(venMesh);
+		
+		//terra
+		
+	   terMat = CVmMaterial();
+	   terMesh = CVmNewMesh(VRP_SPHERE);
+	   terText = CVmTexture("ter.jpg");
+	   terMat.SetTexture(terText);
+	   terMesh.Normalize(3);
+	   terMesh.ForceMaterial(terMat);
+	   terObj = CVmObj(terMesh);
+	   
+	   //luna
+	   
+	   lunMat = CVmMaterial();
+	   lunMesh = CVmNewMesh(VRP_SPHERE);
+	   lunText = CVmTexture("lun.jpg");
+	   lunMat.SetTexture(lunText);
+	   lunMesh.Normalize(0.2);
+	   lunMesh.ForceMaterial(lunMat);
+	   lunObj = CVmObj(lunMesh);
+		//marte
+		
+	   martMat = CVmMaterial();
+	   martMesh = CVmNewMesh(VRP_SPHERE);
+	   martText = CVmTexture("mart.jpg");
+	   martMat.SetTexture(martText);
+	   martMesh.Normalize(3);
+	   martMesh.ForceMaterial(martMat);
+	   martObj = CVmObj(martMesh);
+		
+	   //giove
+	   
+	   gioMat = CVmMaterial();
+	   gioMesh = CVmNewMesh(VRP_SPHERE);
+	   gioText = CVmTexture("gio.jpg");
+	   gioMat.SetTexture(gioText);
+	   gioMesh.Normalize(10);
+	   gioMesh.ForceMaterial(gioMat);
+	   gioObj = CVmObj(gioMesh);
+	   
+	   //saturno
+	   
+	   satMat = CVmMaterial();
+	   satMesh = CVmNewMesh(VRP_SPHERE);
+	   satRingMesh = CVmNewMesh(VRP_SPHERE);
+	   satRingMesh2 = CVmNewMesh(VRP_SPHERE);
+	   satText = CVmTexture("sat.jpg");
+	   satMat.SetTexture(satText);
+	   satMesh.Normalize(10);
+	   satRingMesh.Normalize(22);
+	   satRingMesh2.Normalize(12);
+	   satMesh.ForceMaterial(satMat);
+	   satRingMesh.ForceMaterial(satMat);
+	   satObj = CVmObj(satMesh);
+	   satRingObj = CVmObj(satRingMesh);
+	   satRingObj2 = CVmObj(satRingMesh2);
+	   satRingObj.SetScale(1,0,1);
+	   satRingObj2.SetScale(1,0,1);
+	   satRingMesh2.ModulateMaterials(0,0,0);
+	 	
+	   //urano
+	   urMat = CVmMaterial();
+	   urMesh = CVmNewMesh(VRP_SPHERE);
+	   urText = CVmTexture("ur.jpg");
+	   urMat.SetTexture(urText);
+	   urMesh.Normalize(7);
+	   urMesh.ForceMaterial(urMat);
+	   urObj = CVmObj(urMesh);
+	   
+	   
+	   //nettuno
+	   netMat = CVmMaterial();
+	   netMesh = CVmNewMesh(VRP_SPHERE);
+	   netText = CVmTexture("net.jpg");
+	   netMat.SetTexture(netText);
+	   netMesh.Normalize(7);
+	   netMesh.ForceMaterial(netMat);
+	   netObj = CVmObj(netMesh);
+	   
+	   //plutone
+      
+       plutMat = CVmMaterial();
+	   plutMesh = CVmNewMesh(VRP_SPHERE);
+	   plutText = CVmTexture("plu.jpg");
+	   plutMat.SetTexture(plutText);
+	   plutMesh.Normalize(2);
+	   plutMesh.ForceMaterial(plutMat);
+	   plutObj = CVmObj(plutMesh);
+       
+       avi = CVmMMAvi();
+ 	   
+       glEnable(GL_NORMALIZE);
+      
+}
+ 
+function orbital(radius){
+	glPushAttrib(GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
+      
+       			glLineWidth(0.5);
+      			 glDisable(GL_LIGHTING);
+      			 glColor(1.0,1.0,1.0);
+       			
+       			var DEG2RAD = 3.14159/180; 
+      			 glBegin(GL_LINE_LOOP);
+            			 
+            			 for(var i=0; i<360;i++){
+            			 	
+            			 	 var degInRad = i*DEG2RAD;
+			            	 glVertex(cos(degInRad)*radius, 0.0,sin(degInRad)*radius);
+			           }
+			             
+			      glEnd();
+			      
+			       /* polite restoration of previous OpenGL status */
+			      glPopAttrib();
+}
+ 
+ 
+function OnFrame()
+{
+       /* manage camera */
+       CameraMoveMouse();
+       KeyboardManager();
+       Light0.SetPosition(1,1,1);
+       
+       //rotazione
+       if(trigger_rotazione){
+       	var temp = GetTime();
+       	if(temp - LTime>10){
+       		contAngle += 0.011;
+       		venAngle += 0.01;
+       		terAngle += 0.008;
+       		lunAngle += 0.03;
+       		martAngle += 0.007;
+       		gioAngle += 0.005;
+       		satAngle += 0.003;
+       		urAngle += 0.0025;
+       		netAngle += 0.0023;
+       		plutAngle += 0.0015;
+       	
+       		camAngle += 0.01;
+              	       	
+       		LTime = temp;
+       		myobj2.rotateABS(1,0,1,0);
+       		venObj.rotateABS(1,0,1,0);
+       		terObj.rotateABS(1,0,1,0);
+      	 	lunObj.rotateABS(1,0,1,0);
+      		martObj.rotateABS(1,0,1,0);
+       		gioObj.rotateABS(1,0,1,0);
+       		satObj.rotateABS(1,0,1,0);
+       		satRingObj2.rotateABS(1,0,1,0);
+       		urObj.rotateABS(1,0,1,0);
+       		netObj.rotateABS(1,0,1,0);
+       		plutObj.rotateABS(1,0,1,0);
+       	
+      	}
+       	
+       posobj2[0] = cos(contAngle)*20;
+       posobj2[2] = sin(contAngle)*20;     
+       posVen[0] = cos(venAngle)*30;
+       posVen[2] = sin(venAngle)*30;
+       posTer[0] = cos(terAngle)*35;
+       posTer[2] = sin(terAngle)*35;
+       posLun[0] = cos(lunAngle)*3.14;
+       posLun[1] = cos(lunAngle)*3.14;
+       posLun[2] = sin(lunAngle)*3.14;
+       posMart[0] = cos(martAngle)*45;
+       posMart[2] = sin(martAngle)*45;
+       posGio[0] = cos(gioAngle)*60;
+       posGio[2] = sin(gioAngle)*60;
+       posSat[0] = cos(satAngle)*85;
+       posSat[2] = sin(satAngle)*85;
+       posUr[0] =cos(urAngle)*105;
+       posUr[2] = sin(urAngle)*105;
+       posNet[0] = cos(netAngle)*125;
+       posNet[2] = sin(netAngle)*125;
+	   posPlu[0] = cos(netAngle)*165;
+	   posPlu[2] = sin(netAngle)*165;
+	   
+       
+       CamPos[0] = cos(camAngle)*150;
+       CamPos[2] = sin(camAngle)*200;
+        }
+       myobj.SetPosition(posobj);
+       myobj2.SetPosition(posobj2);
+       venObj.SetPosition(posVen);
+       terObj.SetPosition(posTer);
+       lunObj.SetPosition(posTer[0]+posLun[0], posLun[1], posTer[2]-posLun[2]);
+       martObj.SetPosition(posMart);
+       gioObj.SetPosition(posGio);
+       satObj.SetPosition(posSat);
+       satRingObj.SetPosition(posSat);
+       satRingObj2.SetPosition(posSat);
+       urObj.SetPosition(posUr);
+       netObj.SetPosition(posNet);
+       plutObj.SetPosition(posPlu);
+       
+      if(trigger_camera){
+   	   CameraGetCurrent().SetPosition(CamPos[0]-posPlu[0], CamPos[1], CamPos[2]-posPlu[2]);
+       CameraGetCurrent().SetTarget(0.0,0.0,0.0);
+	}
+       if(trigger_orizzontale){
+       	CameraGetCurrent().SetPosition(0.0,5.0,400.0);
+       	CameraGetCurrent().SetTarget(0.0,0.0,0.0);
+       	
+       	if(trigger_orizzontale && trigger_label){
+       		label_sol = CVmText();
+       		label_sol.Load("Sole");
+       		label_sol.SetColor(255.0,255.0,255.0);
+       		label_sol.SetScale(5,5);
+       		label_sol.SetPosition(posobj[0]-5, posobj[1]+15, posobj[2]);
+       		
+       		label_merc = CVmText();
+       		label_merc.Load("Mercurio");
+       		label_merc.SetColor(255.0,255.0,255.0);
+       		label_merc.SetScale(5,5);
+       		label_merc.SetPosition(posobj2[0]-8, posobj2[1]+5, posobj2[2]);
+       		
+       		label_ven = CVmText();
+       		label_ven.Load("Venere");
+       		label_ven.SetColor(255.0,255.0,255.0);
+       		label_ven.SetScale(5,5);
+       		label_ven.SetPosition(posVen[0]-5, posVen[1]-5, posVen[2]);
+       		
+       		label_ter = CVmText();
+       		label_ter.Load("Terra");
+       		label_ter.SetColor(255.0,255.0,255.0);
+       		label_ter.SetScale(5,5);
+       		label_ter.SetPosition(posTer[0]-5, posTer[1]+4, posTer[2]);
+       		
+       		label_mart = CVmText();
+       		label_mart.Load("Marte");
+       		label_mart.SetColor(255.0,255.0,255.0);
+       		label_mart.SetScale(5,5);
+       		label_mart.SetPosition(posMart[0]-5, posMart[1]-4, posMart[2]);
+       		
+       		label_gio = CVmText();
+       		label_gio.Load("Giove");
+       		label_gio.SetColor(255.0,255.0,255.0);
+       		label_gio.SetScale(5,5);
+       		label_gio.SetPosition(posGio[0]-8, posTer[1]+8, posTer[2]);
+       		
+       		label_sat = CVmText();
+       		label_sat.Load("Saturno");
+       		label_sat.SetColor(255.0,255.0,255.0);
+       		label_sat.SetScale(5,5);
+       		label_sat.SetPosition(posSat[0]-8, posSat[1]-10, posSat[2]);
+       		
+       		label_ur = CVmText();
+       		label_ur.Load("Urano");
+       		label_ur.SetColor(255.0,255.0,255.0);
+       		label_ur.SetScale(5,5);
+       		label_ur.SetPosition(posUr[0]-8, posUr[1]+10, posUr[2]);
+       		
+       		label_net = CVmText();
+       		label_net.Load("Nettuno");
+       		label_net.SetColor(255.0,255.0,255.0);
+       		label_net.SetScale(5,5);
+       		label_net.SetPosition(posNet[0]-5, posNet[1]+5, posNet[2]);
+       		
+       		label_plu = CVmText();
+       		label_plu.Load("Plutone");
+       		label_plu.SetColor(255.0,255.0,255.0);
+       		label_plu.SetScale(5,5);
+       		label_plu.SetPosition(posPlu[0]-3, posPlu[1]+4, posPlu[2]);
+       		
+       	}
+       }
+   
+
+       if(trigger_verticale){
+       	CameraGetCurrent().SetPosition(0.0, 666.0, 0.0);
+       	CameraGetCurrent().SetDirection(0.002, -0.999,0.000);
+       	
+
+       }
+       
+       if(trigger_sole){
+       	CameraGetCurrent().SetPosition(posobj[0]+posTer[0], posTer[1], posobj[2]-posTer[2]);
+       	CameraGetCurrent().SetTarget(posobj);
+       	
+       
+       	if(!trigger_rotazione){
+       		
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*34;
+       		vec[2]= sin(angleX)*34;
+       		
+       		CameraGetCurrent().SetPosition(vec);
+       	}
+       }
+       
+       if(trigger_merc){
+       	CameraGetCurrent().SetPosition(posobj2[0]+3, posobj2[1], posobj2[2]-3);
+       	CameraGetCurrent().SetTarget(posobj2);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*4;
+       		vec[2]= sin(angleX)*4;
+       		CameraGetCurrent().SetPosition(posobj2[0]+vec[0], vec[1],posobj2[2]-vec[2]);
+       	}
+       }
+       
+       if(trigger_ven){
+       	CameraGetCurrent().SetPosition(posVen[0]+3, posVen[1], posVen[2]-3);
+       	CameraGetCurrent().SetTarget(posVen);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       	 	vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*4;
+       		vec[2]= sin(angleX)*4;
+       		CameraGetCurrent().SetPosition(posVen[0]+vec[0], vec[1],posVen[2]-vec[2]);
+       	}
+       }
+       
+       if(trigger_ter){
+       	CameraGetCurrent().SetPosition(posTer[0]+5, posTer[1], posTer[2]-5);
+       	CameraGetCurrent().SetTarget(posTer);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*7;
+       		vec[2]= sin(angleX)*7;
+       		CameraGetCurrent().SetPosition(posTer[0]+vec[0], vec[1],posTer[2]-vec[2]);
+       	}
+       }
+       
+        if(trigger_lun){
+       	CameraGetCurrent().SetPosition(posTer[0]+posLun[0], posLun[1], posTer[2]-(posLun[2]-0.6));
+       	CameraGetCurrent().SetTarget(posTer[0]+posLun[0], posLun[1], posTer[2]-posLun[2]);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		if(angleY>5) angleY=5;
+       		if(angleY<-5) angleY=-5;
+       		vec[0] =cos(angleX)*0.6;
+       		vec[2]= sin(angleX)*0.6;
+       		CameraGetCurrent().SetPosition(posTer[0]+posLun[0]+vec[0], vec[1],posTer[2]-posLun[2]-vec[2]);
+       	}
+       }
+       
+       if(trigger_mart){
+       	CameraGetCurrent().SetPosition(posMart[0]+5, posMart[1], posMart[2]-5);
+       	CameraGetCurrent().SetTarget(posMart);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*7;
+       		vec[2]= sin(angleX)*7;
+       		CameraGetCurrent().SetPosition(posMart[0]+vec[0], vec[1],posMart[2]-vec[2]);
+       	}
+       }
+       if(trigger_gio){
+       	CameraGetCurrent().SetPosition(posGio[0]+15, posGio[1], posGio[2]-15);
+       	CameraGetCurrent().SetTarget(posGio);
+       		if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*21;
+       		vec[2]= sin(angleX)*21;
+       		CameraGetCurrent().SetPosition(posGio[0]+vec[0], vec[1],posGio[2]-vec[2]);
+       	}
+       }
+       
+       if(trigger_sat){
+       	CameraGetCurrent().SetPosition(posSat[0]+25, posSat[1]+4, posSat[2]-25);
+       	CameraGetCurrent().SetTarget(posSat);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*33;
+       		vec[2]= sin(angleX)*33;
+       		CameraGetCurrent().SetPosition(posSat[0]+vec[0], vec[1],posSat[2]-vec[2]);
+       	}
+       }
+       
+        if(trigger_ur){
+       	CameraGetCurrent().SetPosition(posUr[0]+10, posUr[1], posUr[2]-10);
+       	CameraGetCurrent().SetTarget(posUr);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*14;
+       		vec[2]= sin(angleX)*14;
+       		CameraGetCurrent().SetPosition(posUr[0]+vec[0], vec[1],posUr[2]-vec[2]);
+       	}
+       }
+        if(trigger_net){
+       	CameraGetCurrent().SetPosition(posNet[0]+10, posNet[1], posNet[2]-10);
+       	CameraGetCurrent().SetTarget(posNet);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*14;
+       		vec[2]= sin(angleX)*14;
+       		CameraGetCurrent().SetPosition(posNet[0]+vec[0], vec[1],posNet[2]-vec[2]);
+       	}
+       }
+        if(trigger_plu){
+       	CameraGetCurrent().SetPosition(posPlu[0]+3, posPlu[1], posPlu[2]-3);
+       	CameraGetCurrent().SetTarget(posPlu);
+       	if(!trigger_rotazione){
+       		vec = CameraGetCurrent().GetPosition();
+       		vec = VectorRotate(-angleY,1,0,0,vec);
+       		vec[0] =cos(angleX)*4.3;
+       		vec[2]= sin(angleX)*4.3;
+       		CameraGetCurrent().SetPosition(posPlu[0]+vec[0], vec[1],posPlu[2]-vec[2]);
+       	}
+       }
+       SceneBegin();
+       //DrawGrid([1,1,1], 255);
+       // TODO: put your drawing code here
+      if(Selection(myobj, SEL_PICK)){
+      	trigger_sole = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(myobj2, SEL_PICK)){
+      	trigger_merc = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(venObj, SEL_PICK)){
+      	trigger_ven = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(terObj, SEL_PICK)){
+      	trigger_ter = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(lunObj, SEL_PICK)){
+      	trigger_lun = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(martObj, SEL_PICK)){
+      	trigger_mart = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(gioObj, SEL_PICK)){
+      	trigger_gio = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(satObj, SEL_PICK)){
+      	trigger_sat = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(urObj, SEL_PICK)){
+      	trigger_ur = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_net=false;
+		trigger_plu=false;
+      }
+      if(Selection(netObj, SEL_PICK)){
+      	trigger_net = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_plu=false;
+      }
+      if(Selection(plutObj, SEL_PICK)){
+      	trigger_plu = true;
+      	trigger_camera = false;
+      	trigger_orizzontale = false;
+      	trigger_verticale = false;
+      	trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+      }
+      
+       myobj.Draw();      
+       myobj2.Draw();
+       venObj.Draw();
+       terObj.Draw();
+       lunObj.Draw();
+       martObj.Draw();
+       gioObj.Draw();
+       satObj.Draw();
+       satRingObj.Draw();
+       satRingObj2.Draw();
+       urObj.Draw();
+       netObj.Draw();
+       plutObj.Draw();
+       
+       
+       if(trigger_orizzontale && trigger_label){
+       	label_sol.Draw();
+       	label_merc.Draw();
+       	label_ven.Draw();
+       	label_ter.Draw();
+       	label_mart.Draw();
+       	label_gio.Draw();
+       	label_sat.Draw();
+       	label_ur.Draw();
+       	label_net.Draw();
+       	label_plu.Draw();
+       }
+       
+       if(trigger_verticale){
+       			//linea terra;
+       			orbital(20);
+       			orbital(30);
+       			orbital(35);
+       			orbital(45);
+       			orbital(60);
+       			orbital(85);
+       			orbital(105);
+       			orbital(125);
+       			orbital(165);
+       }
+       
+     
+       
+       SceneEnd();
+      
+      DrawTextLayer();
+}
+ 
+
+ 
+function DownloadReady(RequestID)
+{
+       // TODO
+}
+ 
+ 
+ 
+function OnTimer()
+{
+       // TODO:
+}
+ 
+ 
+function OnEvent(eventID, wparam, lparam){
+       // TODO: put your events handling code here
+}
+ 
+function OnError(){
+       // TODO: put your errors handling code here
+}
+ 
+ 
+function OnExit()
+{
+       // TODO: put your cleanup code here
+}
+ 
+ 
+// Camera manager (using mouse)
+function CameraMoveMouse()
+{     
+ 
+       CameraMoveMouse_MBL_LC();
+ 
+}
+
+function KeyboardManager(){
+	
+	if(KeyStatus("P")){
+		trigger_rotazione = !trigger_rotazione;
+		}
+	
+	if(KeyStatus("O")){
+		trigger_orizzontale = true;
+		trigger_verticale = false;
+		trigger_camera=false;
+		trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		avi.Stop();
+		}
+	if(KeyStatus("V")){
+		trigger_verticale = true;
+		trigger_orizzontale = false;
+		trigger_camera=false;
+		trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		avi.Stop();
+		}
+	if(KeyStatus("M")){
+		trigger_camera = true;
+		trigger_verticale = false;
+		trigger_orizzontale = false;
+		trigger_sole=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		avi.Stop();
+	}
+	
+	if(KeyStatus("1")){
+		trigger_sole = true;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_merc=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera=false;
+		avi.Stop();
+		
+	}
+	
+	
+	if(trigger_sole && KeyStatus(VK_SPACE)){
+		trigger_descSole = !trigger_descSole;
+		if(trigger_descSole && trigger_sole){
+       		avi.Load("sole.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	
+	
+	if(KeyStatus("2")){
+		trigger_merc=true;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_ven=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera=false;
+		avi.Stop();
+	
+	}
+	
+		if(trigger_merc && KeyStatus(VK_SPACE)){
+		trigger_descMerc = !trigger_descMerc;
+		if(trigger_descMerc && trigger_merc){
+       		avi.Load("merc.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	
+	
+	if(KeyStatus("3")){
+		trigger_ven=true;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_ter=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_ven && KeyStatus(VK_SPACE)){
+		trigger_descVen = !trigger_descVen;
+		if(trigger_descVen && trigger_ven){
+       		avi.Load("ven.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+		
+	}
+	
+	if(KeyStatus("4")){
+		trigger_ter=true;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_lun=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_ter && KeyStatus(VK_SPACE)){
+		trigger_descTer = !trigger_descTer;
+		if(trigger_descTer && trigger_ter){
+       		avi.Load("ter.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("5")){
+		trigger_lun=true;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_mart=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_lun && KeyStatus(VK_SPACE)){
+		trigger_descLun = !trigger_descLun;
+		if(trigger_descLun && trigger_lun){
+       		avi.Load("lun.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+		
+	if(KeyStatus("6")){
+		trigger_mart=true;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_gio=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}	
+	
+	if(trigger_mart && KeyStatus(VK_SPACE)){
+		trigger_descMart = !trigger_descMart;
+		if(trigger_descMart && trigger_mart){
+       		avi.Load("mart.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("7")){
+		trigger_gio=true;
+		trigger_mart=false;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_sat=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_gio && KeyStatus(VK_SPACE)){
+		trigger_descGio = !trigger_descGio;
+		if(trigger_descGio && trigger_gio){
+       		avi.Load("gio.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("8")){
+		trigger_sat=true;
+		trigger_gio=false;
+		trigger_mart=false;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_ur=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_sat && KeyStatus(VK_SPACE)){
+		trigger_descSat = !trigger_descSat;
+		if(trigger_descSat && trigger_sat){
+       		avi.Load("sat.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("9")){
+		trigger_ur=true;
+		trigger_sat=false;
+		trigger_gio=false;
+		trigger_mart=false;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_net=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_ur && KeyStatus(VK_SPACE)){
+		trigger_descUr = !trigger_descUr;
+		if(trigger_descUr && trigger_ur){
+       		avi.Load("ur.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("0")){
+		trigger_net=true;
+		trigger_ur=false;
+		trigger_sat=false;
+		trigger_gio=false;
+		trigger_mart=false;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_plu=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_net && KeyStatus(VK_SPACE)){
+		trigger_descNet = !trigger_descNet;
+		if(trigger_descNet && trigger_net){
+       		avi.Load("net.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(KeyStatus("Q")){
+		trigger_plu=true;
+		trigger_net=false;
+		trigger_ur=false;
+		trigger_sat=false;
+		trigger_gio=false;
+		trigger_mart=false;
+		trigger_lun=false;
+		trigger_ter=false;
+		trigger_ven=false;
+		trigger_merc=false;
+		trigger_verticale = false;
+		trigger_orizzontale=false;
+		trigger_sole=false;
+		trigger_camera =false;
+		avi.Stop();
+	}
+	
+	if(trigger_plu && KeyStatus(VK_SPACE)){
+		trigger_descPlu = !trigger_descPlu;
+		if(trigger_descPlu && trigger_plu){
+       		avi.Load("plu.avi");
+       		avi.SetVolume(0.8);
+       		avi.Move(0.01,0.55,0.35,0.35);
+     		avi.Play(true); 
+      }		
+      else{avi.Stop();}
+	}
+	
+	if(trigger_orizzontale && KeyStatus("N")){
+		trigger_label=!trigger_label;
+	}
+	
+	
+	
+	if(KeyPressed(VK_LEFT)){
+		angleX -= 0.05;
+	}
+	if(KeyPressed(VK_RIGHT)){
+		angleX += 0.05;
+	}
+	
+	if(KeyPressed(VK_UP)){
+		angleY +=0.05;
+	}
+	if(KeyPressed(VK_DOWN)){
+		angleY -=0.05;
+	}
+}
+function DrawTextLayer()
+//----------------------------------------------------------------------
+{
+	var testo="";
+	var testo2="";
+	var dir = CameraGetDirection();
+	var coord = CameraGetPosition();
+	
+	
+	testo = sprintf("dx: %f - dy: %f - dz: %f", dir[0], dir[1], dir[2]);
+	testo2=sprintf("x: %f - y: %f - z: %f", coord[0], coord[1], coord[2]);
+	
+	
+	ConsoleText(0.01,0.98,testo);
+	ConsoleText(0.01, 0.92, testo2);
+	
+	if(trigger_camera || trigger_verticale || trigger_orizzontale){
+	var infoSistema = "";
+	infoSistema = sprintf("Sistema Solare");
+	ConsoleText(0.01, 0.01, infoSistema);
+	}
+	
+	var nome="";
+	var tipo="";
+	var volume="";
+	var grav="";
+	var temp="";
+	var comp="";
+	var velo="";
+	var distS="";
+	var distT="";
+	var sat="";
+	var perRot="";
+	var perRiv="";
+	var velOrb="";
+	if(trigger_sole){	
+		nome = sprintf("Sole");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_sole && trigger_descSole){
+		
+		tipo = sprintf("TIPO:\nStella - Nana Gialla");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n1,4122 × 10^27 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n274,0 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n5777 K(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Idrogeno\n\t-Elio\n\t-Ossigeno");
+		ConsoleText(0.77, 0.74,comp);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n149.600.000 km");	
+	    ConsoleText(0.77,0.63,distT);
+	    
+	    }
+	}
+	
+	if(trigger_merc){
+		nome = sprintf("Mercurio");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_merc && trigger_descMerc){
+		
+		tipo = sprintf("TIPO:\nPianeta Terrestre");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n6,083 × 10^19 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n3,701 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-173 C°(min)\n\t167 C°(media)\n\t427 C° (alta)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Ferro\n\t-Silicio\n\t-Magnesio\n\t-Alluminio");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n57.910.000 km");	
+	    ConsoleText(0.77,0.58,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n79 - 218 mln/km");	
+	    ConsoleText(0.77,0.52,distT);
+		
+		sat = sprintf("SATELLITI:\nNo");
+		ConsoleText(0.77, 0.46, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n88 giorni");
+		ConsoleText(0.77,0.40, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n58,6 giorni");
+		ConsoleText(0.77, 0.34, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n47,87");
+		ConsoleText(0.77, 0.28, velOrb);
+		
+		}
+	}
+	
+	if(trigger_ven){
+		nome = sprintf("Venere");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_ven && trigger_descVen){
+		tipo = sprintf("TIPO:\nPianeta Terrestre");
+		ConsoleText(0.77, 0.98, tipo);
+		volume=sprintf("VOLUME:\n9,28 × 10^20 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n8,87 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t380 C°(min)\n\t464 C°(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Anidride Carbonica\n\t-Acido Solforico");
+		ConsoleText(0.77, 0.72,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n108.200.000 km");	
+	    ConsoleText(0.77,0.64,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n40 mln/km (min)");	
+	    ConsoleText(0.77,0.58,distT);
+		
+		sat = sprintf("SATELLITI:\nNo");
+		ConsoleText(0.77, 0.52, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n224,7 giorni");
+		ConsoleText(0.77,0.46, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n243 giorni");
+		ConsoleText(0.77, 0.40, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n35,02");
+		ConsoleText(0.77, 0.32, velOrb);
+		
+		}
+	}
+	if(trigger_ter){
+		nome = sprintf("Terra");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_ter && trigger_descTer){
+		tipo = sprintf("TIPO:\nPianeta Terrestre");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n1,08321 × 10^21 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n9,7801 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-89,2 C°(min)\n\t14 C°(media)\n\t57,8 C°(max)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Ossigeno\n\t-Azoto\n\t-Ferro\n\t-Acqua\n\t-Silicio");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n149.600.000 km");	
+	    ConsoleText(0.77,0.56,dists);
+		
+		sat = sprintf("SATELLITI: 1");
+		ConsoleText(0.77, 0.50, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n365,26 giorni");
+		ConsoleText(0.77,0.44, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n23h 56m 4s");
+		ConsoleText(0.77, 0.38, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n29,79");
+		ConsoleText(0.77, 0.32, velOrb);
+		}
+	}
+	if(trigger_lun){
+		nome = sprintf("Luna");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_lun && trigger_descLun){
+			
+		tipo = sprintf("TIPO:\nSatellite");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n2,1958 × 10^19 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n1,622 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-233 C°(min)\n\t-23 C°(media)\n\t123 C° (max)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Uranio\n\t-Torio\n\t-Potassio\n\t-Ossigeno\n\t-Nichel\n\t-Titanio\n\t-Magnesio\n\t-Alluminio");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n150.000.000 km (circa)");	
+	    ConsoleText(0.77,0.48,distS);
+	    
+	    distT = sprintf("DISTANZA DALLA TERRA:\n384.400 km");
+	    ConsoleText(0.77, 0.42, distT);
+			
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n27 giorni");
+		ConsoleText(0.77,0.36, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\nSincrona*\ne' uguale al periodo\ndi rivoluzione");
+		ConsoleText(0.77, 0.30, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n1,023");
+		ConsoleText(0.77, 0.20, velOrb);
+		
+		}
+	}
+	if(trigger_mart){
+		nome = sprintf("Marte");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_mart && trigger_descMart){
+		tipo = sprintf("TIPO:\nPianeta Terrestre");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n1,6318 × 10^20 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n3,69 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-140 C°(min)\n\t-63 C°(media)\n\t20 C° (max)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Ossido Ferrico\n\t-Silicio\n\t-Acqua\n\t-Silicati");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n227.900.000 km");	
+	    ConsoleText(0.77,0.58,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n54,6 mln/km (min)");	
+	    ConsoleText(0.77,0.52,distT);
+		
+		sat = sprintf("SATELLITI: 2");
+		ConsoleText(0.77, 0.46, sat);
+			
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n687 giorni");
+		ConsoleText(0.77,0.40, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n24h 40m");
+		ConsoleText(0.77, 0.34, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n24,13");
+		ConsoleText(0.77, 0.28, velOrb);
+		
+		}
+	}
+	if(trigger_gio){
+		nome = sprintf("Giove");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_gio && trigger_descGio){
+			
+		tipo = sprintf("TIPO:\nGigante Gassoso");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n1,43128 × 10^24 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n23,12 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-163 C°(min)\n\t-121 C°(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Idrogeno\n\t-Elio\n\t-Metano\n\t-Ammoniaca\n\tAcqua");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n778.500.000 km");	
+	    ConsoleText(0.77,0.55,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n588 mln/km (min)");	
+	    ConsoleText(0.77,0.50,distT);
+		
+		sat = sprintf("SATELLITI:16 (+anelli)");
+		ConsoleText(0.77, 0.44, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n11,86 anni");
+		ConsoleText(0.77,0.38, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n9h 50m");
+		ConsoleText(0.77, 0.32, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n13,06");
+		ConsoleText(0.77, 0.24, velOrb);
+		}
+		
+		
+	}
+	if(trigger_sat){
+		nome = sprintf("Saturno");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_sat && trigger_descSat){
+		tipo = sprintf("TIPO:\nGigante Gassoso");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n8,27 × 10^23 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n8,96 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-191 C°(min)\n\t-130 C°(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Idrogeno\n\t-Elio\n\t-Silicati\n\t-Idrogeno Metallico");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n1.426.725.413 km");	
+	    ConsoleText(0.77,0.58,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n1.191 mln/km (min)");	
+	    ConsoleText(0.77,0.52,distT);
+		
+		sat = sprintf("SATELLITI: 18 (+ anelli)");
+		ConsoleText(0.77, 0.44, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n29,46 anni");
+		ConsoleText(0.77,0.38, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n10h 48m");
+		ConsoleText(0.77, 0.32, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n9,66");
+		ConsoleText(0.77, 0.26, velOrb);
+		
+		}
+
+	}
+	if(trigger_ur){
+		nome = sprintf("Urano");
+		ConsoleText(0.01, 0.01, nome);
+	
+		if(trigger_ur && trigger_descUr){		
+		tipo = sprintf("TIPO:\nGigante Gassoso");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n6,834 × 10^22 m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n8,69 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-214 C°(min)\n\t-205 C°(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Idrogeno\n\t-Elio\n\t-Ammoniaca\n\t-Acqua\n\t-Metano");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n2.870.972.220 km");	
+	    ConsoleText(0.77,0.56,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n2.570 mln/km (min)");	
+	    ConsoleText(0.77,0.50,distT);
+		
+		sat = sprintf("SATELLITI:\nSi: 17");
+		ConsoleText(0.77, 0.43, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n84,41 anni");
+		ConsoleText(0.77,0.37, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n17h 17m");
+		ConsoleText(0.77, 0.31, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n6,80");
+		ConsoleText(0.77, 0.25, velOrb);
+		
+		}
+	}
+	if(trigger_net){
+		nome = sprintf("Nettuno");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_net && trigger_descNet){	
+				
+		tipo = sprintf("TIPO:\nGigante Gassoso");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n6,254 × 10^22 m³");
+		ConsoleText(0.77,0.90, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n11,15 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-223 C°(min)\n\t-220 C°(media)");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Idrogeno\n\t-Elio\n\t-Ammoniaca\n\t-Acqua\n\t-Metano");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n4.498.252.900 km");	
+	    ConsoleText(0.77,0.56,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n4.495 mln/km (min)");	
+	    ConsoleText(0.77,0.50,distT);
+		
+		sat = sprintf("SATELLITI: 8");
+		ConsoleText(0.77, 0.44, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n164,8 anni");
+		ConsoleText(0.77,0.38, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n16h 05m");
+		ConsoleText(0.77, 0.32, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n5,44");
+		ConsoleText(0.77, 0.26, velOrb);
+		
+		
+		}
+	}
+	if(trigger_plu){
+		nome = sprintf("Plutone");
+		ConsoleText(0.01, 0.01, nome);
+		
+		if(trigger_plu && trigger_descPlu){
+			
+		tipo = sprintf("TIPO:\nPianeta Nano");
+		ConsoleText(0.77, 0.98, tipo);
+		
+		volume=sprintf("VOLUME:\n6,39 × 10^18  m³");
+		ConsoleText(0.77,0.92, volume);
+		
+		grav = sprintf("F.ZA GRAVITA':\n0,62 m/s²");
+		ConsoleText(0.77,0.86, grav);
+		
+		temp = sprintf("TEMPERATURA:\n\t-233 C°(min)\n\t-228 C°(media)\n\t-223 C°");
+		ConsoleText(0.77, 0.80, temp);
+		
+		comp = sprintf("COMPOSIZIONE CHIMICA:\n\t-Azoto\n\t-Monossido di Carbonio\n\t-Metano");
+		ConsoleText(0.77, 0.70,comp);
+		
+		distS = sprintf("DISTANZA DAL SOLE:\n5.906.380.000 km");	
+	    ConsoleText(0.77,0.56,dists);
+		
+	    distT = sprintf("DISTANZA DALLA TERRA:\n4.500 mln/km (min)");	
+	    ConsoleText(0.77,0.50,distT);
+		
+		sat = sprintf("SATELLITI: 5");
+		ConsoleText(0.77, 0.42, sat);
+		
+		perRiv = sprintf("PERIODO DI RIVOLUZIONE:\n247,8 anni");
+		ConsoleText(0.77,0.38, perRiv);
+		
+		perRot = sprintf("PERIODO DI ROTAZIONE:\n6g 9h 16m");
+		ConsoleText(0.77, 0.32, perRot);
+		
+		velOrb = sprintf("VELOCITA' ORBITALE MEDIA\n(km/s):\n4,7");
+		ConsoleText(0.77, 0.26, velOrb);
+		}
+	}
+	
+	
+	
+	
+}
